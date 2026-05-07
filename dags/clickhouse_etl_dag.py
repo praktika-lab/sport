@@ -96,6 +96,23 @@ def get_data_dir() -> Path:
     return Path(data_dir)
 
 
+def _split_sql_statements(sql_text: str) -> list[str]:
+    lines = [
+        line
+        for line in sql_text.splitlines()
+        if not line.strip().startswith("--")
+    ]
+    return [stmt.strip() for stmt in "\n".join(lines).split(";") if stmt.strip()]
+
+
+def _existing_data_file(data_dir: Path, *names: str) -> Path:
+    for name in names:
+        path = data_dir / name
+        if path.exists():
+            return path
+    return data_dir / names[0]
+
+
 # ---------------------------------------------------------------------------
 # Функции-задачи
 # ---------------------------------------------------------------------------
@@ -108,7 +125,7 @@ def create_schemas(**kwargs: Any) -> None:
     ddl_text = ddl_path.read_text(encoding="utf-8")
 
     # Разбиваем на отдельные выражения по ";" и выполняем по одному
-    statements = [s.strip() for s in ddl_text.split(";") if s.strip() and not s.strip().startswith("--")]
+    statements = _split_sql_statements(ddl_text)
     for stmt in statements:
         ch_query(stmt + ";")
     log.info("DDL выполнен успешно (%d выражений)", len(statements))
@@ -240,7 +257,11 @@ def load_registers(**kwargs: Any) -> None:
     """Загружает Регистры_Накопления_Нефтепродукты_организаций.csv → fuel.registers."""
     data_dir = get_data_dir()
     df = pd.read_csv(
-        data_dir / "Регистры_Накопления_Нефтепродукты_организаций.csv",
+        _existing_data_file(
+            data_dir,
+            "Регистры Накопления Нефтепродукты организаций.csv",
+            "Регистры_Накопления_Нефтепродукты_организаций.csv",
+        ),
         sep=";",
     )
     df.columns = ["dat", "nomenclature", "organization", "movement"]
@@ -254,7 +275,11 @@ def load_monthly_balance(**kwargs: Any) -> None:
     """Загружает Резервуары_Складов_Остатки_Топлива.csv → fuel.monthly_balance."""
     data_dir = get_data_dir()
     df = pd.read_csv(
-        data_dir / "Резервуары_Складов_Остатки_Топлива.csv",
+        _existing_data_file(
+            data_dir,
+            "Резервуары Складов Остатки Топлива.csv",
+            "Резервуары_Складов_Остатки_Топлива.csv",
+        ),
         sep=";",
     )
     df.columns = ["dat", "nomenclature", "organization", "qty"]
