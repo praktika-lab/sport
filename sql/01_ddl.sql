@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS sales.result_task1
     dat           Date,
     w             Decimal(18, 4),
     price         Decimal(18, 4),
-    prev_price    Decimal(18, 4),
+    prev_price    Nullable(Decimal(18, 4)),
     sales_amount  Decimal(18, 4),   -- сумма продаж = price * w
-    price_effect  Decimal(18, 4)    -- эффект = (price - prev_price) * w
+    price_effect  Nullable(Decimal(18, 4))    -- эффект = (price - prev_price) * w
 )
 ENGINE = MergeTree()
 ORDER BY (prod, dat);

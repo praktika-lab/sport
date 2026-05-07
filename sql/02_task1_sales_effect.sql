@@ -34,7 +34,7 @@ with_prev AS (
         dat,
         w,
         price,
-        lagInFrame(price) OVER (
+        lagInFrame(toNullable(price), 1, NULL) OVER (
             PARTITION BY prod
             ORDER BY dat
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
